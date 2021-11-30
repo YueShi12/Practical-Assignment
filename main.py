@@ -24,7 +24,8 @@ def inkfeature(digits, labels) :
 
 
 def regularized_multinomial_logit_model(digits, labels, ink, ink_scale):
-    lr_model = LogisticRegression(penalty='l2', solver='liblinear', max_iter=4000)
+    # may use GridSearchCV(), RandomizedSearchCV() for param select? accu=0.2269 now
+    lr_model = LogisticRegression(C=1e5, solver='lbfgs', multi_class='multinomial', max_iter=4000)
     lr_model.fit(ink_scale, labels)
     pred = lr_model.predict(ink_scale)
     accuracy = metrics.accuracy_score(labels, pred)
