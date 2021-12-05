@@ -4,6 +4,7 @@ import numpy as np
 from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import scale
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import GridSearchCV
@@ -68,14 +69,19 @@ def compare_three_methods(digits, labels):
     # mlm_pred = mlm_model.predict(test_digits)
     # evaluate_results(model = "Multinomial Logit Model", pred = mlm_pred, actual = test_labels)
 
-    # support vector machine
-    clf = get_grid_svm()
-    svm = clf.fit(training_digits, training_labels)
-    print(f"The best parameters for the svm are {svm.best_params_}")
-    svm_pred = svm.predict(test_digits)
-    evaluate_results(model = "SVM", pred = svm_pred, actual = test_labels)
+    # # support vector machine
+    # clf = get_grid_svm()
+    # svm = clf.fit(training_digits, training_labels)
+    # print(f"The best parameters for the svm are {svm.best_params_}")
+    # svm_pred = svm.predict(test_digits)
+    # evaluate_results(model = "SVM", pred = svm_pred, actual = test_labels)
 
     # feed-forward neural network
+    clf = get_grid_nn()
+    nn = clf.fit(training_digits, training_labels)
+    print(f"The best parameters for the nn are {nn.best_params_}")
+    nn_pred = nn.predict(test_digits)
+    evaluate_results(model = "Neural Network", pred = nn_pred, actual = test_labels)
 
 def draw_random_training_sample(digits, labels, size):
     training_indices = np.random.choice(np.arange(0, digits.shape[0]), size = size, replace = False)
@@ -95,7 +101,7 @@ def get_grid_multinomial_logit_model():
             'penalty': ['l2'],
             'C': list(np.arange(0.1, 1.1, 0.2)),
             'solver': ['lbfgs'],
-            'max_iter': [1000],
+            'max_iter': [1000], # as long as theres no errors it's fine
             'multi_class': ['multinomial'],
         }
     ]
@@ -111,6 +117,14 @@ def get_grid_svm():
             }
     ]
     return GridSearchCV(estimator = SVC(), param_grid = param_grid, n_jobs = -1, cv = 10, verbose =  3, scoring = 'accuracy')
+
+def get_grid_nn():
+    param_grid = [
+        {
+            TODO
+        }
+    ]
+    return GridSearchCV(estimator = MLPClassifier(), param_grid = param_grid, n_jobs = -1, cv = 10, verbose =  3, scoring = 'accuracy')
 
 def evaluate_results(model, pred, actual):
     right, wrong = 0, 0
