@@ -17,30 +17,20 @@ def datareadin() :
     mnist_data = pd.read_csv('mnist.csv').values
     labels = mnist_data[:, 0]
     digits = mnist_data[:, 1:]
-    return mnist_data, labels, digits
-
-def get_useless_feature_indices(digits):
-    df = pd.DataFrame(digits)
-    useless_features = df.columns[(df == 0).all()]
-    print(useless_features.tolist())
-    illustration = list(map(lambda pixel: 1 if pixel in useless_features else 0, range(784)))
-    cmap = matplotlib.colors.ListedColormap(['green', 'red'])
-    plt.imshow(np.array(illustration).reshape(img_size, img_size), cmap = cmap)
-    plt.show()
+    return mnist_data, labels, digits 
 
 # we will compare the regularized (LASSO) multinomial logit model, support vector machines,
 # and feed-forward neural networks
 def compare_three_methods(digits, labels):
     # get training set
     training_digits, training_labels, test_digits, test_labels = draw_random_training_sample(digits, labels, size = training_set_size)
-    # scale digits
-    training_digits = scale(training_digits)
-    test_digits = scale(test_digits)
+    # preprocessing
+    training_digits, test_digits = preprocess(training_digits, test_digits)
 
     # multinomial logit model
     clf = get_grid_multinomial_logit_model()
     mlm_model = clf.fit(training_digits, training_labels)
-    print(f"The best parameters for the multinomial logit model are {mlm_model.best_params_}")
+    # print(f"The best parameters for the multinomial logit model are {mlm_model.best_params_}")
     mlm_pred = mlm_model.predict(test_digits)
     evaluate_results(model = "Multinomial Logit Model", pred = mlm_pred, actual = test_labels)
 
@@ -70,6 +60,21 @@ def draw_random_training_sample(digits, labels, size):
             test_labels.append(labels[index])
     return training_digits, training_labels, test_digits, test_labels
 
+def preprocess(training_digits, test_digits):
+    # remove unnecessary features
+    unnecessary_features_indices = get_useless_feature_indices(training_digits)
+    training_digits = np.delete(training_digits, unnecessary_features_indices, axis=1)
+    test_digits = np.delete(test_digits, unnecessary_features_indices, axis=1)
+    # scale digits
+    training_digits = scale(training_digits)
+    test_digits = scale(test_digits)
+    return training_digits, test_digits
+
+def get_useless_feature_indices(digits):
+    df = pd.DataFrame(digits)
+    useless_features = df.columns[(df == 0).all()]
+    return useless_features.tolist()
+
 def get_grid_multinomial_logit_model():
     param_grid = [
         {
@@ -80,8 +85,8 @@ def get_grid_multinomial_logit_model():
             'multi_class': ['multinomial'],
         }
     ]
-    return GridSearchCV(estimator=LogisticRegression(), param_grid = param_grid, n_jobs = -1, cv = 10, verbose = 3, scoring = 'accuracy')
-    # return LogisticRegression(penalty = "l2", C = 0.01, solver = "lbfgs", max_iter = 10000, multi_class = "multinomial")
+    # return GridSearchCV(estimator=LogisticRegression(), param_grid = param_grid, n_jobs = -1, cv = 10, verbose = 3, scoring = 'accuracy')
+    return LogisticRegression(penalty = "l2", C = 0.01, solver = "lbfgs", max_iter = 1000, multi_class = "multinomial")
 
 def get_grid_svm():
     param_grid = [
@@ -120,8 +125,5 @@ def evaluate_results(model, pred, actual):
 
 
 mnist_data, labels, digits = datareadin()
-
-# ink, ink_mean, ink_std, ink_scale = inkfeature(digits,labels)
-# regularized_multinomial_logit_model(digits, labels, ink, ink_scale)
-
 compare_three_methods(digits, labels)
+
