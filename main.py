@@ -23,20 +23,21 @@ def datareadin():
 def inkfeature(digits, labels):
     ink = np.array([sum(row) for row in digits])
 
-    ink_scale = scale(ink).reshape(-1, 1)
     ink_mean = [np.mean(ink[labels == i]) for i in range(10)]
     ink_std = [np.std(ink[labels == i]) for i in range(10)]
 
+    ink_scale = scale(ink).reshape(-1, 1)
+
     return ink, ink_mean, ink_std, ink_scale
 
-def distribution_feature(ink_mean,ink_std,ink_scale,labels):
-    distribution = []
-    for label in labels:
-        f= np.array([ink_mean[label],ink_std[label]])
-        distribution.append(f)
-    distribution = np.array(distribution)
-    d_feature = ink_scale +distribution
-    return d_feature
+# def distribution_feature(ink_mean,ink_std,ink_scale,labels):
+#     distribution = []
+#     for label in labels:
+#         f= np.array([ink_std[label]])
+#         distribution.append(f)
+#     distribution = np.array(distribution)
+#     d_feature = ink_scale +distribution
+#     return d_feature
 
 
 def other_features(digits, ink_scale):
@@ -79,11 +80,11 @@ def regularized_multinomial_logit_model(X_train, labels):
 mnist_data, labels, digits = datareadin()
 
 ink, ink_mean, ink_std, ink_scale = inkfeature(digits, labels)
-d_feature = distribution_feature(ink_mean,ink_std,ink_scale,labels)
+# d_feature = distribution_feature(ink_mean,ink_std,ink_scale,labels)
 o_feature = other_features(digits, ink_scale)
 print('------performance of only using ink feature-------')
 regularized_multinomial_logit_model(ink_scale, labels)
-print('------performance of using both ink and distribution feature-------')
-regularized_multinomial_logit_model(d_feature, labels)
-print('------performance of using feature with high detail level-------')
-regularized_multinomial_logit_model(o_feature, labels)
+# print('------performance of using both ink and distribution feature-------')
+# regularized_multinomial_logit_model(d_feature, labels)
+# print('------performance of using feature with high detail level-------')
+# regularized_multinomial_logit_model(o_feature, labels)
