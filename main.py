@@ -22,19 +22,32 @@ def datareadin():
 
 def inkfeature(digits, labels):
     ink = np.array([sum(row) for row in digits])
+
     ink_scale = scale(ink).reshape(-1, 1)
     ink_mean = [np.mean(ink[labels == i]) for i in range(10)]
     ink_std = [np.std(ink[labels == i]) for i in range(10)]
+
     return ink, ink_mean, ink_std, ink_scale
 
 
-def regularized_multinomial_logit_model(ink_mean, labels, ink, ink_scale):
-    lr_model = LogisticRegression(C=1e5, solver='lbfgs', multi_class='multinomial', max_iter=4000)
+def other_features(digits, labels):
+    ink_four = []
+    for digit in digits:
+        d = digit.reshape(56, 14)
+        ink_f = np.array([sum(row) for row in d])
+        ink_four.append(ink_f)
+    ink_four = np.array(ink_four)
 
-    lr_model.fit(ink_scale, labels)
+    return ink_four
 
-    pred = lr_model.predict(ink_scale)
-    accuracy = metrics.accuracy_score(labels, pred)
+
+def regularized_multinomial_logit_model(ink_mean, labels, ink_scale, ink_four):
+    lr_model = LogisticRegression(C=1e5, solver='lbfgs', multi_class='multinomial', max_iter=5000)
+    X_train = ink_scale + ink_four
+
+    lr_model.fit(X_train, labels)
+
+    pred = lr_model.predict(X_train)
 
     precision = metrics.precision_score(labels, pred, average=None)
 
@@ -52,10 +65,8 @@ def regularized_multinomial_logit_model(ink_mean, labels, ink, ink_scale):
     f1_results.rename(columns={0: 'f1'}, inplace=True)
     print(metrics.classification_report(labels, pred))
 
-    print(accuracy)
-
 
 mnist_data, labels, digits = datareadin()
-
+ink_four = other_features(digits, labels)
 ink, ink_mean, ink_std, ink_scale = inkfeature(digits, labels)
-regularized_multinomial_logit_model(ink_mean, labels, ink, ink_scale)
+regularized_multinomial_logit_model(ink_mean, labels, ink_scale, ink_four)
