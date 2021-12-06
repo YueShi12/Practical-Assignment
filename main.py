@@ -121,7 +121,11 @@ def get_grid_svm():
 def get_grid_nn():
     param_grid = [
         {
-            TODO
+            "hidden_layer_sizes": [(100,), (100, 30)],
+            "solver": ['adam', 'sgd', 'lbfgs'],
+            "max_iter": [200],
+            "verbose": [True]
+            # still looking into other parameters
         }
     ]
     return GridSearchCV(estimator = MLPClassifier(), param_grid = param_grid, n_jobs = -1, cv = 10, verbose =  3, scoring = 'accuracy')
