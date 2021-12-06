@@ -17,41 +17,16 @@ def datareadin() :
     mnist_data = pd.read_csv('mnist.csv').values
     labels = mnist_data[:, 0]
     digits = mnist_data[:, 1:]
-    # print(f"number: {labels[0]}")
-    # plt.imshow(digits[0].reshape(img_size, img_size))
-    # plt.show()
     return mnist_data, labels, digits
 
-# def inkfeature(digits, labels) :
-#     ink = np.array([sum(row) for row in digits])
-#     ink_scale = scale(ink)
-#     print(f"ink_scale shape is {ink_scale.shape}")
-#     ink_scale = ink_scale.reshape(-1, 1)
-#     print(f"ink_scale shape after reshape is {ink_scale.shape}")
-#     ink_mean = [np.mean(ink[labels == i]) for i in range(10)]
-#     ink_std = [np.std(ink[labels == i]) for i in range(10)]
-#     return ink, ink_mean,ink_std,ink_scale
-
-# def regularized_multinomial_logit_model(digits, labels, ink, ink_scale):
-#     # may use GridSearchCV(), RandomizedSearchCV() for param select? accu=0.2269 now
-#     lr_model = LogisticRegression(C=1e5, solver='lbfgs', multi_class='multinomial', max_iter=4000)
-#     lr_model.fit(ink_scale, labels)
-#     pred = lr_model.predict(ink_scale)
-#     accuracy = metrics.accuracy_score(labels, pred)
-#     print(accuracy)
-
-# def show_5_random_drawings_of_digit(digit, digits, labels):
-#     possible_indices = []
-#     for i in range (len(labels)):
-#         if labels[i] == digit:
-#             possible_indices.append(i)
-#     random_drawings = rd.sample(possible_indices, 5)
-#     for index in random_drawings:
-#         plt.imshow(digits[index].reshape(img_size, img_size))
-#         plt.show()
-
-
-
+def get_useless_feature_indices(digits):
+    df = pd.DataFrame(digits)
+    useless_features = df.columns[(df == 0).all()]
+    print(useless_features.tolist())
+    illustration = list(map(lambda pixel: 1 if pixel in useless_features else 0, range(784)))
+    cmap = matplotlib.colors.ListedColormap(['green', 'red'])
+    plt.imshow(np.array(illustration).reshape(img_size, img_size), cmap = cmap)
+    plt.show()
 
 # we will compare the regularized (LASSO) multinomial logit model, support vector machines,
 # and feed-forward neural networks
@@ -64,21 +39,21 @@ def compare_three_methods(digits, labels):
 
     # multinomial logit model
     clf = get_grid_multinomial_logit_model()
-    mlm_model = clf.fit(scale(training_digits), training_labels)
+    mlm_model = clf.fit(training_digits, training_labels)
     print(f"The best parameters for the multinomial logit model are {mlm_model.best_params_}")
     mlm_pred = mlm_model.predict(test_digits)
     evaluate_results(model = "Multinomial Logit Model", pred = mlm_pred, actual = test_labels)
 
     # # support vector machine
     # clf = get_grid_svm()
-    # svm = clf.fit(scale(training_digits), training_labels)
+    # svm = clf.fit(training_digits, training_labels)
     # print(f"The best parameters for the svm are {svm.best_params_}")
     # svm_pred = svm.predict(test_digits)
     # evaluate_results(model = "SVM", pred = svm_pred, actual = test_labels)
 
     # # feed-forward neural network
     # clf = get_grid_nn()
-    # nn = clf.fit(scale(training_digits), training_labels)
+    # nn = clf.fit(training_digits, training_labels)
     # print(f"The best parameters for the nn are {nn.best_params_}")
     # nn_pred = nn.predict(test_digits)
     # evaluate_results(model = "Neural Network", pred = nn_pred, actual = test_labels)
