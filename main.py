@@ -29,21 +29,31 @@ def inkfeature(digits, labels):
 
     return ink, ink_mean, ink_std, ink_scale
 
+def distribution_feature(ink_mean,ink_std,ink_scale,labels):
+    distribution = []
+    for label in labels:
+        f= np.array([ink_mean[label],ink_std[label]])
+        distribution.append(f)
+    distribution = np.array(distribution)
+    d_feature = ink_scale +distribution
+    return d_feature
 
-def other_features(digits, labels):
+
+def other_features(digits, ink_scale):
     ink_four = []
     for digit in digits:
         d = digit.reshape(56, 14)
         ink_f = np.array([sum(row) for row in d])
         ink_four.append(ink_f)
     ink_four = np.array(ink_four)
+    o_feature = ink_scale + ink_four
 
-    return ink_four
+    return o_feature
 
 
-def regularized_multinomial_logit_model(ink_mean, labels, ink_scale, ink_four):
+def regularized_multinomial_logit_model(X_train, labels):
     lr_model = LogisticRegression(C=1e5, solver='lbfgs', multi_class='multinomial', max_iter=5000)
-    X_train = ink_scale + ink_four
+
 
     lr_model.fit(X_train, labels)
 
@@ -67,6 +77,13 @@ def regularized_multinomial_logit_model(ink_mean, labels, ink_scale, ink_four):
 
 
 mnist_data, labels, digits = datareadin()
-ink_four = other_features(digits, labels)
+
 ink, ink_mean, ink_std, ink_scale = inkfeature(digits, labels)
-regularized_multinomial_logit_model(ink_mean, labels, ink_scale, ink_four)
+d_feature = distribution_feature(ink_mean,ink_std,ink_scale,labels)
+o_feature = other_features(digits, ink_scale)
+print('------performance of only using ink feature-------')
+regularized_multinomial_logit_model(ink_scale, labels)
+print('------performance of using both ink and distribution feature-------')
+regularized_multinomial_logit_model(d_feature, labels)
+print('------performance of using feature with high detail level-------')
+regularized_multinomial_logit_model(o_feature, labels)
