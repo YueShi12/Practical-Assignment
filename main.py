@@ -101,12 +101,13 @@ def get_grid_svm():
 def get_grid_nn():
     param_grid = [
         {
-            "hidden_layer_sizes": [(100,), (100, 30)],
+            "hidden_layer_sizes": [(400,), (450, 450), (480,), (500,)],
             "solver": ['adam', 'sgd', 'lbfgs'],
             "activation" :['identity', 'logistic', 'tanh', 'relu'],
             "max_iter": [200],
             "verbose": [True]
-            # still looking into other parameters
+            # The best parameters for the nn are {'hidden_layer_sizes': (480,), 'max_iter': 200, 'solver': 'adam', 'activation': 'relu','verbose': True}
+            # The accuracy of the Neural Network is 0.9384594594594594
         }
     ]
     return GridSearchCV(estimator = MLPClassifier(), param_grid = param_grid, n_jobs = -1, cv = 10, verbose =  3, scoring = 'accuracy')
