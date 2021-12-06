@@ -123,6 +123,7 @@ def get_grid_nn():
         {
             "hidden_layer_sizes": [(100,), (100, 30)],
             "solver": ['adam', 'sgd', 'lbfgs'],
+            "activation" :['identity', 'logistic', 'tanh', 'relu'],
             "max_iter": [200],
             "verbose": [True]
             # still looking into other parameters
