@@ -27,19 +27,19 @@ def compare_three_methods(digits, labels):
     # preprocessing
     training_digits, test_digits = preprocess(training_digits, test_digits)
 
-    # multinomial logit model
-    clf = get_grid_multinomial_logit_model()
-    mlm_model = clf.fit(training_digits, training_labels)
-    # print(f"The best parameters for the multinomial logit model are {mlm_model.best_params_}")
-    mlm_pred = mlm_model.predict(test_digits)
-    evaluate_results(model = "Multinomial Logit Model", pred = mlm_pred, actual = test_labels)
+    # # multinomial logit model
+    # clf = get_grid_multinomial_logit_model()
+    # mlm_model = clf.fit(training_digits, training_labels)
+    # # print(f"The best parameters for the multinomial logit model are {mlm_model.best_params_}")
+    # mlm_pred = mlm_model.predict(test_digits)
+    # evaluate_results(model = "Multinomial Logit Model", pred = mlm_pred, actual = test_labels)
 
-    # # support vector machine
-    # clf = get_grid_svm()
-    # svm = clf.fit(training_digits, training_labels)
-    # print(f"The best parameters for the svm are {svm.best_params_}")
-    # svm_pred = svm.predict(test_digits)
-    # evaluate_results(model = "SVM", pred = svm_pred, actual = test_labels)
+    # support vector machine
+    clf = get_grid_svm()
+    svm = clf.fit(training_digits, training_labels)
+    print(f"The best parameters for the svm are {svm.best_params_}")
+    svm_pred = svm.predict(test_digits)
+    evaluate_results(model = "SVM", pred = svm_pred, actual = test_labels)
 
     # # feed-forward neural network
     # clf = get_grid_nn()
@@ -91,9 +91,9 @@ def get_grid_multinomial_logit_model():
 def get_grid_svm():
     param_grid = [
         {
-            'C': [.001 ,.01, .1, 1, 10, 100, 1000], 
-            # 'gamma': [1,0.1,0.01,0.001],
-            'kernel': ['rbf', 'poly', 'sigmoid']
+            'C': [.01, .1, 1, 10, 100, 1000], 
+            'kernel': ['poly'],
+	        'degree': [2,3,4,5]
         }
     ]
     return GridSearchCV(estimator = SVC(), param_grid = param_grid, n_jobs = -1, cv = 10, verbose =  3, scoring = 'accuracy')
